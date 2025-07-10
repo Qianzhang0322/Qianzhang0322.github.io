@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>半导体掺杂能带模拟系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f1721, #1e2a3a);
+            color: #ecf0f1;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 4px;
+            width: 100px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            border-radius: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 15px auto 0;
+            line-height: 1.6;
+            color: #a0b3c6;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 30px;
+        }
+        
+        .control-panel {
+            background: rgba(25, 35, 60, 0.85);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 150, 255, 0.25);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .control-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .panel-title i {
+            font-size: 1.6rem;
+            background: rgba(79, 172, 254, 0.15);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .control-group {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        
+        .control-group:last-child {
+            border-bottom: none;
+        }
+        
+        .control-label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 500;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .dopant-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .dopant-option {
+            background: rgba(20, 30, 60, 0.8);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dopant-option:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .dopant-option:hover {
+            background: rgba(40, 60, 120, 0.9);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dopant-option.active {
+            border-color: #4facfe;
+            background: rgba(40, 80, 160, 0.9);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+        }
+        
+        .dopant-option.active:before {
+            background: #4facfe;
+        }
+        
+        .dopant-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dopant-type {
+            font-size: 1rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .intrinsic {
+            background: rgba(241, 196, 15, 0.25);
+            color: #f1c40f;
+        }
+        
+        .p-type {
+            background: rgba(231, 76, 60, 0.25);
+            color: #e74c3c;
+        }
+        
+        .n-type {
+            background: rgba(52, 152, 219, 0.25);
+            color: #3498db;
+        }
+        
+        .slider-container {
+            background: rgba(20, 30, 60, 0.6);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 18px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to right, #1a2a6c, #4facfe);
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4facfe;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.8);
+            border: 2px solid white;
+            transition: transform 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 1.05rem;
+            color: #a0b3c6;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(25deg);
+            transition: all 0.6s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+        
+        .btn:hover:after {
+            left: 120%;
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .band-diagram {
+            background: rgba(25, 35, 60, 0.85);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 150, 255, 0.25);
+            height: 550px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .band-diagram:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .chart-container {
+            height: 100%;
+            position: relative;
+        }
+        
+        .info-panel {
+            background: rgba(25, 35, 60, 0.85);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 150, 255, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .info-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+        
+        .info-card {
+            background: rgba(20, 30, 60, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: #4facfe;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .info-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-content {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .semiconductor-type {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        
+        .conduction-info {
+            margin-top: 18px;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            background: rgba(20, 30, 60, 0.6);
+            padding: 8px 15px;
+            border-radius: 30px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .system-description {
+            background: rgba(25, 35, 60, 0.85);
+            border-radius: 18px;
+            padding: 25px;
+            margin-top: 30px;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            border: 1px solid rgba(100, 150, 255, 0.25);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .system-description:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .concentration-info {
+            background: rgba(20, 30, 60, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .carrier-explanation {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            margin-top: 20px;
+        }
+        
+        .carrier-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .carrier-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .electron {
+            background: #3498db;
+        }
+        
+        .hole {
+            border: 2px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+        
+        .carrier-label {
+            font-size: 1rem;
+        }
+        
+        .animation-area {
+            position: relative;
+            height: 120px;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(20, 30, 60, 0.4);
+        }
+        
+        .carrier-animation {
+            position: absolute;
+            font-size: 24px;
+            transition: transform 1s ease;
+        }
+        
+        .electron-anim {
+            color: #3498db;
+        }
+        
+        .hole-anim {
+            color: #e74c3c;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dopant-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .band-diagram {
+                height: 450px;
+            }
+            
+            .panel-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-atom"></i> 半导体掺杂能带模拟系统</h1>
+            <p class="subtitle">直观展示掺杂浓度对费米能级位置和载流子浓度的影响 - 探索半导体物理的微观世界</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <div class="panel-title">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>掺杂参数控制</span>
+                </div>
+                
+                <!-- 掺杂元素选择 -->
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-vial"></i>
+                        <span>选择半导体类型</span>
+                    </label>
+                    <div class="dopant-selector">
+                        <div class="dopant-option active" data-type="intrinsic" data-element="Si">
+                            <div class="dopant-name">本征硅</div>
+                            <div class="dopant-type intrinsic">本征</div>
+                        </div>
+                        <div class="dopant-option" data-type="p" data-element="B">
+                            <div class="dopant-name">硼 (B)</div>
+                            <div class="dopant-type p-type">P型</div>
+                        </div>
+                        <div class="dopant-option" data-type="n" data-element="P">
+                            <div class="dopant-name">磷 (P)</div>
+                            <div class="dopant-type n-type">N型</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 掺杂浓度控制 -->
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-flask"></i>
+                        <span>掺杂浓度 (cm⁻³)</span>
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="dopant-concentration" min="0" max="18" step="0.1" value="0">
+                        <div class="value-display">
+                            <span>0</span>
+                            <span id="concentration-value">本征</span>
+                            <span>10¹⁸</span>
+                        </div>
+                    </div>
+                    <div class="concentration-info" id="concentration-info">
+                        当前状态: <span class="semiconductor-type intrinsic">本征半导体</span>
+                    </div>
+                </div>
+                
+                <!-- 载流子动画区域 -->
+                <div class="animation-area" id="carrier-animation-area">
+                    <!-- 电子和空穴动画将通过JS添加 -->
+                </div>
+                
+                <!-- 操作按钮 -->
+                <button class="btn" id="simulate-btn">
+                    <i class="fas fa-play"></i>
+                    模拟能带结构
+                </button>
+                
+                <!-- 载流子说明 -->
+                <div class="carrier-explanation">
+                    <div class="carrier-item">
+                        <div class="carrier-icon electron">
+                            <i class="fas fa-circle" style="color: white; font-size: 12px;"></i>
+                        </div>
+                        <span class="carrier-label">电子 (多数载流子)</span>
+                    </div>
+                    <div class="carrier-item">
+                        <div class="carrier-icon hole"></div>
+                        <span class="carrier-label">空穴 (多数载流子)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 可视化区域 -->
+            <div class="visualization">
+                <!-- 能带图 -->
+                <div class="band-diagram">
+                    <div class="panel-title">
+                        <i class="fas fa-chart-line"></i>
+                        <span>能带结构图</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="band-chart"></canvas>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #3498db;"></div>
+                            <span>导带 (Conduction Band)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #e74c3c;"></div>
+                            <span>价带 (Valence Band)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #9b59b6;"></div>
+                            <span>费米能级 (Fermi Level)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 信息面板 -->
+                <div class="info-panel">
+                    <div class="panel-title">
+                        <i class="fas fa-info-circle"></i>
+                        <span>半导体特性</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-title">
+                                <i class="fas fa-microchip"></i>
+                                <span>半导体类型</span>
+                            </div>
+                            <div class="info-content">
+                                本征半导体
+                                <div class="semiconductor-type intrinsic">未掺杂</div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-title">
+                                <i class="fas fa-atom"></i>
+                                <span>掺杂元素</span>
+                            </div>
+                            <div class="info-content">
+                                无
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-title">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>载流子浓度</span>
+                            </div>
+                            <div class="info-content">
+                                1.5×10<sup>10</sup> cm<sup>-3</sup>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-title">
+                                <i class="fas fa-bolt"></i>
+                                <span>导电特性</span>
+                            </div>
+                            <div class="info-content">
+                                <div class="semiconductor-type intrinsic">电子 = 空穴</div>
+                            </div>
+                        </div>
+                        <div class="info-card" style="grid-column: span 2;">
+                            <div class="info-title">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>能带特性</span>
+                            </div>
+                            <div class="conduction-info">
+                                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 禁带宽度: 1.12 eV</p>
+                                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 费米能级位置: 禁带中央</p>
+                                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 本征载流子浓度: 1.5×10<sup>10</sup> cm<sup>-3</sup></p>
+                                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 电导率: 4.3×10<sup>-6</sup> S/cm</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="system-description">
+            <h3><i class="fas fa-lightbulb"></i> 半导体掺杂原理</h3>
+            <p>半导体掺杂是通过添加特定杂质原子来改变半导体材料电学特性的过程：</p>
+            <p><b>本征半导体</b>：纯净的半导体材料（如硅），电子和空穴浓度相等（n<sub>i</sub> ≈ 1.5×10<sup>10</sup> cm<sup>-3</sup>），费米能级位于禁带中央。</p>
+            <p><b>P型半导体</b>：掺杂硼(B)等三价元素，形成受主能级，接受电子产生空穴，使空穴成为多数载流子。费米能级向价带移动。</p>
+            <p><b>N型半导体</b>：掺杂磷(P)等五价元素，形成施主能级，提供自由电子，使电子成为多数载流子。费米能级向导带移动。</p>
+            <p>通过调节掺杂浓度，可以精确控制半导体的导电性能，这是现代电子器件制造的基础。</p>
+        </div>
+    </div>
+    
+    <script>
+        // 粒子背景配置
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#4facfe" },
+                shape: { type: "circle" },
+                opacity: { value: 0.3, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#4facfe",
+                    opacity: 0.1,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 1,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                },
+                modes: {
+                    grab: { distance: 140, line_linked: { opacity: 0.3 } },
+                    push: { particles_nb: 4 }
+                }
+            },
+            retina_detect: true
+        });
+        
+        // 获取DOM元素
+        const dopantOptions = document.querySelectorAll('.dopant-option');
+        const concentrationSlider = document.getElementById('dopant-concentration');
+        const concentrationValue = document.getElementById('concentration-value');
+        const concentrationInfo = document.getElementById('concentration-info');
+        const simulateBtn = document.getElementById('simulate-btn');
+        const animationArea = document.getElementById('carrier-animation-area');
+        
+        // 当前选择的掺杂元素
+        let selectedDopant = {
+            element: 'Si',
+            type: 'intrinsic'
+        };
+        
+        // 当前掺杂浓度（指数）
+        let currentConcentration = 0;
+        
+        // 初始化能带图
+        const bandCtx = document.getElementById('band-chart').getContext('2d');
+        let bandChart;
+        
+        // 掺杂元素选择逻辑
+        dopantOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除所有active类
+                dopantOptions.forEach(opt => opt.classList.remove('active'));
+                // 添加active类到当前选项
+                option.classList.add('active');
+                
+                // 更新选择的掺杂元素
+                selectedDopant = {
+                    element: option.dataset.element,
+                    type: option.dataset.type
+                };
+                
+                // 更新半导体类型显示
+                updateSemiconductorInfo();
+                updateConcentrationInfo();
+                
+                // 更新载流子动画
+                updateCarrierAnimation();
+                
+                // 立即更新图表
+                simulateBandStructure();
+            });
+        });
+        
+        // 浓度滑块逻辑
+        concentrationSlider.addEventListener('input', () => {
+            currentConcentration = parseFloat(concentrationSlider.value);
+            updateConcentrationInfo();
+            updateCarrierAnimation();
+            
+            // 立即更新图表
+            simulateBandStructure();
+        });
+        
+        // 更新浓度显示
+        function updateConcentrationInfo() {
+            if (currentConcentration === 0) {
+                concentrationValue.textContent = "本征";
+                concentrationInfo.innerHTML = "当前状态: <span class='semiconductor-type intrinsic'>本征半导体</span>";
+            } else {
+                concentrationValue.textContent = `10${getSuperscript(currentConcentration)}`;
+                if (selectedDopant.type === 'p') {
+                    concentrationInfo.innerHTML = `当前状态: <span class='semiconductor-type p-type'>P型掺杂 ${getSuperscript(currentConcentration)} cm⁻³</span>`;
+                } else if (selectedDopant.type === 'n') {
+                    concentrationInfo.innerHTML = `当前状态: <span class='semiconductor-type n-type'>N型掺杂 ${getSuperscript(currentConcentration)} cm⁻³</span>`;
+                } else {
+                    concentrationInfo.innerHTML = "当前状态: <span class='semiconductor-type intrinsic'>本征半导体</span>";
+                }
+            }
+        }
+        
+        // 更新载流子动画
+        function updateCarrierAnimation() {
+            // 清除现有动画
+            animationArea.innerHTML = '';
+            
+            // 计算电子和空穴的数量
+            let electronCount, holeCount;
+            if (currentConcentration === 0) {
+                // 本征半导体
+                electronCount = 8;
+                holeCount = 8;
+            } else if (selectedDopant.type === 'p') {
+                // P型半导体
+                holeCount = 10 + Math.floor(currentConcentration * 1.5);
+                electronCount = Math.max(2, 10 - Math.floor(currentConcentration));
+            } else if (selectedDopant.type === 'n') {
+                // N型半导体
+                electronCount = 10 + Math.floor(currentConcentration * 1.5);
+                holeCount = Math.max(2, 10 - Math.floor(currentConcentration));
+            } else {
+                electronCount = 8;
+                holeCount = 8;
+            }
+            
+            // 创建电子
+            for (let i = 0; i < electronCount; i++) {
+                createCarrier('electron');
+            }
+            
+            // 创建空穴
+            for (let i = 0; i < holeCount; i++) {
+                createCarrier('hole');
+            }
+        }
+        
+        // 创建载流子动画元素
+        function createCarrier(type) {
+            const carrier = document.createElement('div');
+            carrier.className = `carrier-animation ${type}-anim`;
+            carrier.innerHTML = type === 'electron' ? '<i class="fas fa-circle"></i>' : '<i class="fas fa-circle-notch"></i>';
+            
+            // 随机位置
+            const x = Math.random() * (animationArea.offsetWidth - 30);
+            const y = Math.random() * (animationArea.offsetHeight - 30);
+            carrier.style.left = `${x}px`;
+            carrier.style.top = `${y}px`;
+            
+            animationArea.appendChild(carrier);
+            
+            // 动画
+            animateCarrier(carrier, type);
+        }
+        
+        // 载流子动画
+        function animateCarrier(carrier, type) {
+            const areaWidth = animationArea.offsetWidth;
+            const areaHeight = animationArea.offsetHeight;
+            
+            // 随机目标位置
+            const targetX = Math.random() * (areaWidth - 30);
+            const targetY = Math.random() * (areaHeight - 30);
+            
+            // 随机速度（电子比空穴快）
+            const speed = type === 'electron' ? Math.random() * 3000 + 2000 : Math.random() * 5000 + 3000;
+            
+            // 应用动画
+            carrier.style.transition = `all ${speed}ms linear`;
+            carrier.style.transform = `translate(${targetX - parseFloat(carrier.style.left)}px, ${targetY - parseFloat(carrier.style.top)}px)`;
+            
+            // 动画完成后重新开始
+            setTimeout(() => {
+                animateCarrier(carrier, type);
+            }, speed);
+        }
+        
+        // 上标数字转换
+        function getSuperscript(number) {
+            const superscripts = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
+            const numStr = number.toFixed(1);
+            let result = '';
+            
+            for (let i = 0; i < numStr.length; i++) {
+                const char = numStr[i];
+                if (char === '.') {
+                    result += '⋅';
+                } else {
+                    const digit = parseInt(char);
+                    result += superscripts[digit];
+                }
+            }
+            
+            return result;
+        }
+        
+        // 更新半导体信息
+        function updateSemiconductorInfo() {
+            const typeElement = document.querySelector('.semiconductor-type');
+            const typeText = document.querySelector('.info-content:first-child');
+            const conductivityText = document.querySelectorAll('.info-content')[3];
+            const dopantElement = document.querySelectorAll('.info-content')[1];
+            
+            if (selectedDopant.type === 'intrinsic') {
+                typeElement.textContent = '未掺杂';
+                typeElement.className = 'semiconductor-type intrinsic';
+                typeText.innerHTML = '本征半导体 <div class="semiconductor-type intrinsic">未掺杂</div>';
+                conductivityText.innerHTML = '<div class="semiconductor-type intrinsic">电子 = 空穴</div>';
+                dopantElement.textContent = '无';
+            } else if (selectedDopant.type === 'p') {
+                typeElement.textContent = '受主掺杂';
+                typeElement.className = 'semiconductor-type p-type';
+                typeText.innerHTML = 'P型半导体 <div class="semiconductor-type p-type">受主掺杂</div>';
+                conductivityText.innerHTML = '<div class="semiconductor-type p-type">空穴导电</div>';
+                dopantElement.textContent = '硼 (B)';
+            } else {
+                typeElement.textContent = '施主掺杂';
+                typeElement.className = 'semiconductor-type n-type';
+                typeText.innerHTML = 'N型半导体 <div class="semiconductor-type n-type">施主掺杂</div>';
+                conductivityText.innerHTML = '<div class="semiconductor-type n-type">电子导电</div>';
+                dopantElement.textContent = '磷 (P)';
+            }
+        }
+        
+        // 模拟能带结构
+        function simulateBandStructure() {
+            // 销毁旧图表（如果存在）
+            if (bandChart) {
+                bandChart.destroy();
+            }
+            
+            // 生成能带数据
+            const kPoints = [];
+            const conductionBand = [];
+            const valenceBand = [];
+            const fermiLevel = [];
+            
+            // 根据掺杂类型和浓度调整能带
+            let shift = 0;
+            if (selectedDopant.type === 'p' && currentConcentration > 0) {
+                shift = 0.08 * currentConcentration; // P型向下移动
+            } else if (selectedDopant.type === 'n' && currentConcentration > 0) {
+                shift = 0.08 * currentConcentration; // N型向上移动
+            }
+            
+            // 生成数据点
+            for (let k = 0; k <= 10; k += 0.1) {
+                kPoints.push(k.toFixed(1));
+                
+                // 导带 E = k²
+                conductionBand.push(1.2 + Math.pow(k-5, 2) * 0.02);
+                
+                // 价带 E = -k²
+                valenceBand.push(-Math.pow(k-5, 2) * 0.02);
+                
+                // 费米能级
+                let fermi;
+                if (currentConcentration === 0) {
+                    fermi = 0.6;
+                } else if (selectedDopant.type === 'p') {
+                    fermi = 0.6 - shift; // P型向下移动
+                } else if (selectedDopant.type === 'n') {
+                    fermi = 0.6 + shift; // N型向上移动
+                } else {
+                    fermi = 0.6;
+                }
+                fermiLevel.push(fermi);
+            }
+            
+            // 创建数据集
+            const datasets = [
+                {
+                    label: '导带',
+                    data: conductionBand,
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 4,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.4
+                },
+                {
+                    label: '价带',
+                    data: valenceBand,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderWidth: 4,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.4
+                },
+                {
+                    label: '费米能级',
+                    data: fermiLevel,
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    borderWidth: 4,
+                    borderDash: [8, 5],
+                    pointRadius: 0,
+                    tension: 0
+                }
+            ];
+            
+            // 创建图表
+            bandChart = new Chart(bandCtx, {
+                type: 'line',
+                data: {
+                    labels: kPoints,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'k-空间',
+                                color: '#ecf0f1',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.15)'
+                            },
+                            ticks: {
+                                color: '#a0b3c6',
+                                maxTicksLimit: 11,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '能量 (eV)',
+                                color: '#ecf0f1',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            min: -0.5,
+                            max: 1.7,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.15)'
+                            },
+                            ticks: {
+                                color: '#a0b3c6',
+                                stepSize: 0.5,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(25, 35, 60, 0.9)',
+                            titleColor: '#4facfe',
+                            bodyColor: '#ecf0f1',
+                            borderColor: 'rgba(100, 150, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' eV';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // 更新能带特性信息
+            let bandGap, fermiPosition, carrierConcentration, conductivity;
+            
+            if (currentConcentration === 0) {
+                bandGap = "1.12";
+                fermiPosition = "禁带中央";
+                carrierConcentration = `1.5×10<sup>10</sup> cm<sup>-3</sup>`;
+                conductivity = `4.3×10<sup>-6</sup> S/cm`;
+            } else if (selectedDopant.type === 'p') {
+                bandGap = "1.12";
+                fermiPosition = currentConcentration < 10 ? "靠近禁带中央" : "靠近价带顶";
+                carrierConcentration = `10<sup>${Math.floor(currentConcentration)}</sup> cm<sup>-3</sup>`;
+                conductivity = (0.8 + currentConcentration * 0.1).toFixed(2) + " S/cm";
+            } else if (selectedDopant.type === 'n') {
+                bandGap = "1.12";
+                fermiPosition = currentConcentration < 10 ? "靠近禁带中央" : "靠近导带底";
+                carrierConcentration = `10<sup>${Math.floor(currentConcentration)}</sup> cm<sup>-3</sup>`;
+                conductivity = (0.8 + currentConcentration * 0.12).toFixed(2) + " S/cm";
+            } else {
+                bandGap = "1.12";
+                fermiPosition = "禁带中央";
+                carrierConcentration = `1.5×10<sup>10</sup> cm<sup>-3</sup>`;
+                conductivity = `4.3×10<sup>-6</sup> S/cm`;
+            }
+            
+            const conductionInfo = document.querySelector('.conduction-info');
+            conductionInfo.innerHTML = `
+                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 禁带宽度: ${bandGap} eV</p>
+                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 费米能级位置: ${fermiPosition}</p>
+                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 多数载流子浓度: ${carrierConcentration}</p>
+                <p><i class="fas fa-arrow-right" style="color: #4facfe;"></i> 电导率: ${conductivity}</p>
+            `;
+            
+            // 更新载流子浓度显示
+            if (currentConcentration === 0) {
+                document.querySelectorAll('.info-content')[2].innerHTML = 
+                    `1.5×10<sup>10</sup> cm<sup>-3</sup>`;
+            } else {
+                document.querySelectorAll('.info-content')[2].innerHTML = 
+                    `10<sup>${Math.floor(currentConcentration)}</sup> cm<sup>-3</sup>`;
+            }
+            
+            // 在能带图上绘制电子和空穴
+            setTimeout(drawCarriers, 100);
+        }
+        
+        // 在能带图上绘制电子和空穴
+        function drawCarriers() {
+            if (!bandChart) return;
+            
+            const ctx = bandChart.ctx;
+            const xAxis = bandChart.scales.x;
+            const yAxis = bandChart.scales.y;
+            
+            // 计算导带底和价带顶的位置
+            const conductionBottom = 1.2; // 导带底能量值
+            const valenceTop = 0; // 价带顶能量值
+            
+            // 计算位置
+            const conductionBottomY = yAxis.getPixelForValue(conductionBottom);
+            const valenceTopY = yAxis.getPixelForValue(valenceTop);
+            const centerX = xAxis.getPixelForValue(5); // x=5处
+            
+            // 计算载流子数量（相对浓度）
+            let electronCount, holeCount;
+            if (currentConcentration === 0) {
+                // 本征半导体
+                electronCount = 3;
+                holeCount = 3;
+            } else if (selectedDopant.type === 'p') {
+                // P型半导体
+                electronCount = Math.max(1, 5 - Math.floor(currentConcentration/3));
+                holeCount = Math.min(5, 3 + Math.floor(currentConcentration/3));
+            } else if (selectedDopant.type === 'n') {
+                // N型半导体
+                electronCount = Math.min(5, 3 + Math.floor(currentConcentration/3));
+                holeCount = Math.max(1, 5 - Math.floor(currentConcentration/3));
+            } else {
+                electronCount = 3;
+                holeCount = 3;
+            }
+            
+            // 绘制电子（实心圆）在导带底
+            ctx.save();
+            ctx.shadowColor = 'rgba(52, 152, 219, 0.7)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.fillStyle = '#3498db';
+            const electronSpacing = 25;
+            const electronStartX = centerX - (electronCount - 1) * electronSpacing / 2;
+            
+            for (let i = 0; i < electronCount; i++) {
+                const x = electronStartX + i * electronSpacing;
+                ctx.beginPath();
+                ctx.arc(x, conductionBottomY - 20, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 绘制空穴（空心圆）在价带顶
+            ctx.shadowColor = 'rgba(231, 76, 60, 0.7)';
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            const holeSpacing = 25;
+            const holeStartX = centerX - (holeCount - 1) * holeSpacing / 2;
+            
+            for (let i = 0; i < holeCount; i++) {
+                const x = holeStartX + i * holeSpacing;
+                ctx.beginPath();
+                ctx.arc(x, valenceTopY + 20, 8, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化浓度显示
+            updateConcentrationInfo();
+            
+            // 初始化半导体信息
+            updateSemiconductorInfo();
+            
+            // 初始化载流子动画
+            updateCarrierAnimation();
+            
+            // 初始化能带图
+            simulateBandStructure();
+            
+            // 添加模拟按钮动画效果
+            simulateBtn.addEventListener('click', function() {
+                this.classList.add('active');
+                setTimeout(() => this.classList.remove('active'), 300);
+            });
+        });
+    </script>
+</body>
+</html>
